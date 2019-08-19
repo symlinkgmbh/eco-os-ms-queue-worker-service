@@ -1,0 +1,32 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "The queue worker service process all jobs in the queue service.",
+    "version": "1.0.0",
+    "title": "2ndLock queue worker service",
+    "termsOfService": "http://2ndLock.com",
+    "contact": {
+      "email": "jens@symlink.de"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/heartbeat": {
+      "get": {
+        "tags": ["heartbeat"],
+        "summary": "get current heartbeat from service",
+        "description": "response with current service health",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
