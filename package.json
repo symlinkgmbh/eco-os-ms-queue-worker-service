@@ -3,11 +3,17 @@
   "version": "0.0.1",
   "description": "Workerservice for execute and handle queued jobs.",
   "main": "src/server.ts",
+  "license": "Apache-2.0",
   "scripts": {
     "clean": "yarn run rimraf lib",
     "start:dev": "ts-node src/server.ts",
-    "start": "export NODE_ENV=production && node lib/server.js",
-    "build": "yarn clean && yarn tsc && yarn gulp compile:hard"
+    "lint:fix": "yarn run tslint --fix --project .",
+    "test:unit": "yarn run jest --json --outputFile=test_unit.json --passWithNoTests --detectOpenHandles ./__tests__",
+    "test:integration:dev": "yarn run jest --json --outputFile=test_integration.json --passWithNoTests --detectOpenHandles ./__integration__/dev",
+    "test:integration:enterprise": "yarn run jest --json --outputFile=test_integration.json --passWithNoTests --detectOpenHandles ./__integration__/enterprise",
+    "test:integration:paranoid": "yarn run jest --json --outputFile=test_integration.json --passWithNoTests --detectOpenHandles ./__integration__/paranoid",
+    "test:integration:noncommercial": "yarn run jest --json --outputFile=test_integration.json --passWithNoTests --detectOpenHandles ./__integration__/non_commercial",
+    "build": "yarn clean && yarn tsc && yarn gulp compile:hard && yarn gulp inject:license"
   },
   "devDependencies": {
     "@types/config": "^0.0.34",
@@ -44,5 +50,5 @@
   },
   "company": "Symlink GmbH",
   "homepage": "https://2ndlock.com",
-  "repository": "https://gitlab.com"
+  "repository": "https://gitlab.com/symlinkde"
 }
