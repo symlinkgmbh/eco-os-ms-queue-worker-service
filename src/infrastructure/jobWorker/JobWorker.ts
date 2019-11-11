@@ -121,6 +121,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.job.trace = err;
           this.updateJobStatus(task, "failover", err.message);
           return;
@@ -133,6 +134,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.job.trace = err;
           this.updateJobStatus(task, "failover");
           return;
@@ -145,6 +147,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.job.trace = err;
           this.updateJobStatus(task, "failover");
           return;
@@ -165,6 +168,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.failover.trace = err;
           this.updateJobStatus(task, "crashed", err.message);
           return;
@@ -177,6 +181,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.failover.trace = err;
           this.updateJobStatus(task, "crashed");
           return;
@@ -189,6 +194,7 @@ export class JobWorker implements IJobWorker {
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
+          Log.log(err, LogLevel.error);
           task.failover.trace = err;
           this.updateJobStatus(task, "crashed");
           return;

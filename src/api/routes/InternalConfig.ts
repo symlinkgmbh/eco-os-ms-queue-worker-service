@@ -17,26 +17,24 @@
 
 
 
-import { Application } from "express";
+import { AbstractRoutes } from "@symlinkde/eco-os-pk-api";
 import { PkApi } from "@symlinkde/eco-os-pk-models";
-import { Heartbeat, MetricsRoute, LicenseBeat, ConfigBeat } from "./routes";
+import { Application, Request, Response, NextFunction } from "express";
+import Config from "config";
 
-export class Router implements PkApi.IRouter {
-  protected heartbeat: Heartbeat | undefined;
-  protected licenseBeat: LicenseBeat | undefined;
-  protected configBeat: ConfigBeat | undefined;
-  protected metrics: MetricsRoute | undefined;
-  private app: Application;
-
-  constructor(_app: Application) {
-    this.app = _app;
+export class ConfigBeat extends AbstractRoutes implements PkApi.IRoute {
+  constructor(app: Application) {
+    super(app);
+    this.activate();
   }
 
-  public initRoutes(): void {
-    this.heartbeat = new Heartbeat(this.app);
-    this.licenseBeat = new LicenseBeat(this.app);
-    this.configBeat = new ConfigBeat(this.app);
-    this.metrics = new MetricsRoute(this.app);
-    return;
+  public activate(): void {
+    this.getApp()
+      .route("/internal")
+      .get((req: Request, res: Response, next: NextFunction) => {
+        res.send(<PkApi.IConfigBeat>{
+          config: Config.util.toObject(),
+        });
+      });
   }
 }

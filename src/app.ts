@@ -63,27 +63,20 @@ export class Bootstrapper {
     this.bootstrapper.loadGobalErrorHandler(process);
   }
 
-  public init(): Promise<Application> {
-    return new Promise((resolve, reject) => {
-      Promise.all([this.initLogSystem(), this.bootstrapper.signInServiceRegistry()])
-        .then(() => {
-          resolve(this.api.init());
-        })
-        .catch((err) => {
-          Log.log(err, LogLevel.error);
-          reject(err);
-        });
-    });
+  public async init(): Promise<Application> {
+    try {
+      this.initLogSystem();
+      await this.bootstrapper.signInServiceRegistry();
+      return await this.api.init();
+    } catch (err) {
+      Log.log(err, LogLevel.error);
+      process.exit(1);
+      throw new Error(err);
+    }
   }
 
-  private initLogSystem(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        resolve(Log.log(`init ${Config.get("name")} ${Config.get("version")}`, LogLevel.info));
-      } catch (err) {
-        Log.log(err, LogLevel.error);
-        reject(err);
-      }
-    });
+  private initLogSystem(): void {
+    Log.log(`init ${Config.get("name")} ${Config.get("version")}`, LogLevel.info);
+    return;
   }
 }
