@@ -26,7 +26,7 @@ const setTimeoutPromise = util.promisify(setTimeout);
 import { IJobs } from "../../models";
 import { Log, LogLevel } from "@symlinkde/eco-os-pk-log";
 import { injectQueueClient, dynamicClientContainer, ECO_OS_PK_CORE_TYPES } from "@symlinkde/eco-os-pk-core";
-import { PkCore, PkHttp } from "@symlinkde/eco-os-pk-models";
+import { PkCore, PkHttp, MsQueue } from "@symlinkde/eco-os-pk-models";
 import { StaticJobUtils } from "../jobUtils";
 
 @injectQueueClient
@@ -63,17 +63,20 @@ export class JobWorker implements IJobWorker {
   }
 
   private async process(job: IJobs): Promise<void> {
-    await this.updateJobStatus(job, "processing");
+    await this.updateJobStatus(job, MsQueue.QueueStates.processing);
 
     Log.log(`process job ${job.id}`, LogLevel.info);
     await setTimeoutPromise(500);
 
-    if (job.status === "failover") {
+    if (job.status === MsQueue.QueueStates.failover) {
       Log.log("execute failover job", LogLevel.info);
       const failoverClient = await this.processTarget(job.failover.target);
 
       if (failoverClient === null) {
-        await this.queueClient.updateJob(job.id, { status: "crashed", trace: `can´t resolve ${job.failover.target}` });
+        await this.queueClient.updateJob(job.id, {
+          status: MsQueue.QueueStates.crashed,
+          trace: `can´t resolve ${job.failover.target}`,
+        });
         this.initWorkerLoop();
         return;
       }
@@ -86,7 +89,10 @@ export class JobWorker implements IJobWorker {
 
     const client = await this.processTarget(job.job.target);
     if (client === null) {
-      await this.queueClient.updateJob(job.id, { status: "crashed", trace: `can´t resolve ${job.job.target}` });
+      await this.queueClient.updateJob(job.id, {
+        status: MsQueue.QueueStates.crashed,
+        trace: `can´t resolve ${job.job.target}`,
+      });
       this.initWorkerLoop();
       return;
     }
@@ -116,40 +122,40 @@ export class JobWorker implements IJobWorker {
       case "POST":
         try {
           await client.getClient().post(task.job.path, task.job.payload.body);
-          this.updateJobStatus(task, "finished");
+          this.updateJobStatus(task, MsQueue.QueueStates.finished);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.job.trace = err;
-          this.updateJobStatus(task, "failover", err.message);
+          this.updateJobStatus(task, MsQueue.QueueStates.failover, err.message);
           return;
         }
       case "PUT":
         try {
           await client.getClient().put(task.job.path, task.job.payload.body);
-          this.updateJobStatus(task, "finished");
+          this.updateJobStatus(task, MsQueue.QueueStates.finished);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.job.trace = err;
-          this.updateJobStatus(task, "failover");
+          this.updateJobStatus(task, MsQueue.QueueStates.failover);
           return;
         }
       case "DELETE": {
         try {
           await client.getClient().delete(task.job.path);
-          this.updateJobStatus(task, "finished");
+          this.updateJobStatus(task, MsQueue.QueueStates.finished);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.job.trace = err;
-          this.updateJobStatus(task, "failover");
+          this.updateJobStatus(task, MsQueue.QueueStates.failover);
           return;
         }
       }
@@ -163,40 +169,40 @@ export class JobWorker implements IJobWorker {
       case "POST":
         try {
           await client.getClient().post(task.failover.path, task.failover.payload.body);
-          this.updateJobStatus(task, "error");
+          this.updateJobStatus(task, MsQueue.QueueStates.error);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.failover.trace = err;
-          this.updateJobStatus(task, "crashed", err.message);
+          this.updateJobStatus(task, MsQueue.QueueStates.crashed, err.message);
           return;
         }
       case "PUT":
         try {
           await client.getClient().put(task.failover.path, task.failover.payload.body);
-          this.updateJobStatus(task, "error");
+          this.updateJobStatus(task, MsQueue.QueueStates.error);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.failover.trace = err;
-          this.updateJobStatus(task, "crashed");
+          this.updateJobStatus(task, MsQueue.QueueStates.crashed);
           return;
         }
       case "DELETE": {
         try {
           await client.getClient().delete(task.failover.path);
-          this.updateJobStatus(task, "error");
+          this.updateJobStatus(task, MsQueue.QueueStates.error);
           Log.log("job successfully executed", LogLevel.info);
           return;
         } catch (err) {
           Log.log("job failed", LogLevel.error);
           Log.log(err, LogLevel.error);
           task.failover.trace = err;
-          this.updateJobStatus(task, "crashed");
+          this.updateJobStatus(task, MsQueue.QueueStates.crashed);
           return;
         }
       }

@@ -20,6 +20,7 @@
 import { IJobReducer } from "./IJobReducer";
 import { injectable, inject } from "inversify";
 import { IJobs } from "../../models";
+import { MsQueue } from "@symlinkde/eco-os-pk-models";
 import { IJobReader } from "../jobReader";
 import { WORKERTYPES } from "../workerTypes";
 
@@ -35,9 +36,9 @@ export class JobReducer implements IJobReducer {
     const jobs = await this.jobReader.getCurrentJobsFromQueue();
     return jobs.filter((job: IJobs) => {
       return (
-        job.status === "scheduled" ||
-        (job.status === "crashed" && job.attempts <= 3) ||
-        (job.status === "failover" && job.attempts <= 3)
+        job.status === MsQueue.QueueStates.scheduled ||
+        (job.status === MsQueue.QueueStates.crashed && job.attempts <= 3) ||
+        (job.status === MsQueue.QueueStates.failover && job.attempts <= 3)
       );
     });
   }

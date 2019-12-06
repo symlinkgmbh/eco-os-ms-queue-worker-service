@@ -18,5 +18,4 @@
 
 
 export { IJobs } from "./IJob";
-export { JobStates } from "./EnumJobState";
 export { IPayloadStore } from "./IPayloadStore";

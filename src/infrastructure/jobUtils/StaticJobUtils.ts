@@ -19,6 +19,6 @@
 
 export class StaticJobUtils {
   public static getArtificiallyDelay(): number {
-    return Math.round(Math.random() * (7000 - 1500) + 1500);
+    return Math.round(Math.random() * (6500 - 1500) + 1500);
   }
 }
